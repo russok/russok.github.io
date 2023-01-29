@@ -1,0 +1,4 @@
+Sitemap: https://russok.github.io/sitemapindex.xml
+
+User-Agent: *
+Host: russok.github.io
