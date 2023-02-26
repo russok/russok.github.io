@@ -2,9 +2,9 @@
 <html prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article# " lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="description" content="Explorations in software construction">
+<meta name="description" content="Thoughts on software construction and maybe some other subjects">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Software design</title>
+<title>Ruslan Sokolovski</title>
 <link href="assets/css/all-nocdn.css" rel="stylesheet" type="text/css">
 <link href="https://fonts.googleapis.com/css?family=Playfair+Display:700,900" rel="stylesheet">
 <meta name="theme-color" content="#5670d4">
@@ -30,7 +30,7 @@
           <div class="col-md-6 col-xs-10 col-sm-10 bootblog4-brand" style="width: auto;">
             <a class="navbar-brand blog-header-logo text-dark" href=".">
 
-            <span id="blog-title">Software design</span>
+            <span id="blog-title">Ruslan Sokolovski</span>
         </a>
           </div>
             <div class="col-md-3 justify-content-end align-items-center bs-nav-collapsible collapse flex-collapse bootblog4-right-nav">
@@ -78,217 +78,19 @@
             <time class="published dt-published" datetime="2023-01-21T17:55:57-08:00" itemprop="datePublished" title="2023-01-21 17:55">2023-01-21 17:55</time></a>
             </p>
                 </div>
-            </header><div class="e-content entry-content">
-                    <aside class="admonition admonition-abstract"><p class="admonition-title">Abstract</p>
+            </header><div class="p-summary entry-summary">
+                    <div>
 <p>Once Linus Torvalds blesses something, that thing is destined to achieve world domination -
 exemplified by Linux and Git. Now Rust has received the royal nod - it has been accepted as another
-language for Linux kernel development. Efforts are underway to
-<a class="reference external" href="https://itsfoss.com/rust-cli-tools">rewrite</a>
-<a class="reference external" href="https://github.com/ogham/exa">everything</a>
-<a class="reference external" href="https://blog.edfloreshz.dev/articles/linux/system76/rust-based-desktop-environment/">in Rust</a>
-:). I will
-write about how Rust is different and similar to other mainstream languages. Then I will compare
-implementations of a simple web service in Python, Javascript, C++, C#, Java, and
+language for Linux kernel development. Efforts are underway to rewrite everything in Rust, starting
+from the <a class="reference external" href="https://github.com/ogham/exa">ls</a> utility and other <a class="reference external" href="https://itsfoss.com/rust-cli-tools">everyday command line tools</a>
+to the <a class="reference external" href="https://blog.edfloreshz.dev/articles/linux/system76/rust-based-desktop-environment/">whole graphical desktop environment</a>.
+In this article I discuss similarities and differences between Rust and other mainstream languages.
+I compare implementations of a simple web service in Python, Javascript, C++, C#, Java, and
 Rust, and race them against each other to compare their performance.</p>
-</aside><section id="introduction"><h2>Introduction</h2>
-<p>This post started as an exploration of <a class="reference external" href="https://www.rust-lang.org/">Rust</a>, by a neophite,
-and developed into a benchmark of asynchronous web services in different languages.</p>
-<p>I started looking at researching Rust to see what causes so much enthusiasm about the language
-among experienced software developers and novices alike. The language designers at Mozilla were motivated
-by the desire to work with a performant language that is safer and simpler than C++. I have written
-C++ code for decades, seen the evolution of the language, was frustrated by its many foot-guns, but
-also delighted by the emerging simplicity of the code enabled by the most recent iterations of the
-C++ standard. So I took Rust for a spin and summarized my findings here. I compared the language
-features, tools, and the software performance to the languages I am most familiar with: C++, C#,
-Java, Python, Javascript.</p>
-</section><section id="the-30-000-foot-overview"><h2>The 30,000 foot overview</h2>
-<p>Rust is a strongly typed language, very much like many other mainstream languages, such as C++, C#, Java.
-Strong typing is a practically a must for writing performant software.
-Languages with <a class="reference external" href="https://en.wikipedia.org/wiki/Duck_typing">duck-typing</a>
-(such as Python and Javascript) win on the ease of prototyping,
-but lose on software performance and on the ability to scale software projects to
-millions lines of code.</p>
-<p>Another pillar of Rust is the value safety. I put in this bucket the const correctness and the absence of null pointers.
-The former means that each variable is by default declared as constant and the compiler will prevent you
-from accidentally changing it. The latter comes about due to prolific use of dicriminated unions and the
-compiler forcing the programmer to deal with all members of the union. Another compile time mechanism,
-called <em>borrow checker</em>, was added to avoid "use after free" errors. In addition, bounds checks are performed
-automatically at run time on each array access.</p>
-<p>Another feature of the language, according to its cheerleaders, is simplicity.
-Simplicity is often in the eyes of the beholder. Looks like Rust avoids the complexity of C++'s template
-metaprogramming, but at the cost of using powerful (and necessarily complex) preprocessor.</p>
-</section><section id="features"><h2>Features</h2>
-<p>Take some C++ ideas</p>
-<ul class="simple">
-<li><p>Const correctness</p></li>
-<li><p>Scopes, RAII, smart pointers</p></li>
-<li><p>Lifetime management</p></li>
-</ul>
-<p>but</p>
-<ul class="simple">
-<li><p>Remove exceptions - pervasively use variant&lt;&gt; and optional&lt;&gt;, with some syntactic sugar added</p></li>
-<li><p>Remove template metaprogramming, keep parameterized types</p></li>
-<li><p>Add stronger (and more complicated) preprocessor</p></li>
-<li><p>No null pointers</p></li>
-<li><p>Add a lot of love and care for the users: package repository, tools</p></li>
-</ul></section><section id="microservice-speed-test"><h2>Microservice speed test</h2>
-<ul class="simple">
-<li><p>Asynchronous web servers - support 10k connections (unfinished requests)</p></li>
-<li><p>Python, NodeJS, C++, C#, Java, Rust</p></li>
-<li><p>Lack of language support for asynchronicity in Java</p></li>
-<li><p>The example service is absolutely minimal, is async (controlled by the event loop), but does not use the asynchronicity.
-That is to measure only the speed of the server and not the speed of dependent services, json serializers, etc</p></li>
-</ul></section><section id="speed-test-results"><h2>Speed test results</h2>
-<figure><a class="reference external image-reference" href="rust_and_microservices/py3.8-fast-api.html"><img alt="Performance of the FastAPI microservice under Python 3.8." class="thumbnail" src="rust_and_microservices/py3.8.png"></a>
-</figure><p>The following performance measurements were performed on an XPS-13 Dell laptop running Ubuntu 20.04:</p>
-<ul class="simple">
-<li><p>Tokio/Warp (Rust)</p></li>
-<li><p>Boost::beast (C++), 1 thread</p></li>
-<li><p>Boost::beast (C++), 2 threads</p></li>
-<li><p>Boost::beast (C++), 3 threads</p></li>
-<li><p>FastAPI under Python 3.8</p></li>
-<li><p>FastAPI under Python 3.11</p></li>
-<li><p>Node Express (Javascript)</p></li>
-<li><p>Bayou (Java), restricted to 1 thread</p></li>
-<li><p>Bayou (Java)</p></li>
-<li><p>ASP.NET (C#)</p></li>
-</ul>
-<!-- +- - - - - - - - -+- - - - - - - -+- - - - - - -+- - - - - - -+- - - - - - -+- - - - - -+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -+
-|   VIRT  |   RES  |   SHR | %CPU  | %MEM  | Rate | COMMAND                                                                      |
-+- - - - - - - - -+- - - - - - - -+- - - - - - -+- - - - - - -+- - - - - - -+- - - - - -+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -+
-| 817708  |  3244  |  2940 | 155.0 |  0.0  |  75k | `Rust <../../rust_and_microservices/rust.html>`_                             |
-|   8272  |  4668  |  4180 |  99.7 |  0.0  |  47k | ./beast-server 0.0.0.0 3030 1                                                |
-|  81504  |  4360  |  4072 | 200.0 |  0.0  |  58k | ./beast-server 0.0.0.0 3030 2                                                |
-| 155228  |  4404  |  4120 | 295.7 |  0.0  |  72k | ./beast-server 0.0.0.0 3030 3                                                |
-| 150040  | 37876  | 16112 | 100.0 |  0.2  |   9k | .venv/bin/python3.8 .venv/bin/uvicorn demo_server:app                        |
-| 152896  | 41496  | 17348 | 100.0 |  0.3  |  11k | .venv/bin/python3.11 .venv/bin/uvicorn demo_server:app                       |
-| 619840  | 77376  | 30088 | 106.0 |  0.5  |  10k | node index.js                                                                |
-| 6450576 | 134620 | 27484 | 100.3 |  0.8  |  61k | java -XX:ActiveProcessorCount=1 -jar bayou-microservice.jar                  |
-| 8438220 | 270052 | 28140 | 233.6 |  1.7  |  69k | java -jar bayou-microservice.jar                                             |
-| 263.1g  | 253468 | 64360 | 327.9 |  1.6  |  62k | ./bin/release/net7.0/asp.net                                                 |
-+- - - - - - - - -+- - - - - - - -+- - - - - - -+- - - - - - -+- - - - - - -+- - - - - -+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -+ --><style>
-table.right-align-except-right-col thead tr:nth-child(odd),
-table.right-align-except-right-col tbody tr:nth-child(even)
-{
-  background-color: #f2f2f2;
-}
-table.right-align-except-right-col tr
-{
-    text-align: right
-}
-table.right-align-except-right-col tr td:last-child,
-table.right-align-except-right-col tr th:last-child
-{
-    text-align: left; padding-left: 2em
-}
-</style>
-<!-- in sphinx, use rst-class instead --><table class="right-align-except-right-col" style="width: 100%;">
-<caption>Resource consumption and performance of microservices, roughly ordered by the amount of RAM consumed.
-Virtual, Resident and Shared memory numbers are in kB units. The 100% CPU corresponds to 1 core, and 100% of RAM is 16GB.
-Follow the links to see full performance reports.</caption>
-<thead><tr>
-<th class="head"><p>VIRT</p></th>
-<th class="head"><p>RES</p></th>
-<th class="head"><p>SHR</p></th>
-<th class="head"><p>%CPU</p></th>
-<th class="head"><p>%MEM</p></th>
-<th class="head"><p>Rate</p></th>
-<th class="head"><p>Implementation</p></th>
-</tr></thead>
-<tbody>
-<tr>
-<td><p>817708</p></td>
-<td><p>3244</p></td>
-<td><p>2940</p></td>
-<td><p>155.0</p></td>
-<td><p>0.0</p></td>
-<td><p>75k</p></td>
-<td><p><a class="reference external" href="rust_and_microservices/rust.html">Tokio/Warp (Rust)</a></p></td>
-</tr>
-<tr>
-<td><p>8272</p></td>
-<td><p>4668</p></td>
-<td><p>4180</p></td>
-<td><p>99.7</p></td>
-<td><p>0.0</p></td>
-<td><p>47k</p></td>
-<td><p><a class="reference external" href="rust_and_microservices/report-beast.html">Boost::beast (C++), 1 thread</a></p></td>
-</tr>
-<tr>
-<td><p>81504</p></td>
-<td><p>4360</p></td>
-<td><p>4072</p></td>
-<td><p>200.0</p></td>
-<td><p>0.0</p></td>
-<td><p>58k</p></td>
-<td><p><a class="reference external" href="rust_and_microservices/report-beast-2.html">Boost::beast (C++), 2 threads</a></p></td>
-</tr>
-<tr>
-<td><p>155228</p></td>
-<td><p>4404</p></td>
-<td><p>4120</p></td>
-<td><p>295.7</p></td>
-<td><p>0.0</p></td>
-<td><p>72k</p></td>
-<td><p><a class="reference external" href="rust_and_microservices/report-beast-3.html">Boost::beast (C++), 3 threads</a></p></td>
-</tr>
-<tr>
-<td><p>150040</p></td>
-<td><p>37876</p></td>
-<td><p>16112</p></td>
-<td><p>100.0</p></td>
-<td><p>0.2</p></td>
-<td><p>9k</p></td>
-<td><p><a class="reference external" href="rust_and_microservices/py3.8-fast-api.html">FastAPI under Python 3.8</a></p></td>
-</tr>
-<tr>
-<td><p>152896</p></td>
-<td><p>41496</p></td>
-<td><p>17348</p></td>
-<td><p>100.0</p></td>
-<td><p>0.3</p></td>
-<td><p>11k</p></td>
-<td><p><a class="reference external" href="rust_and_microservices/py3.11-fast-api.html">FastAPI under Python 3.11</a></p></td>
-</tr>
-<tr>
-<td><p>619840</p></td>
-<td><p>77376</p></td>
-<td><p>30088</p></td>
-<td><p>106.0</p></td>
-<td><p>0.5</p></td>
-<td><p>10k</p></td>
-<td><p><a class="reference external" href="rust_and_microservices/report-node.html">Node Express (Javascript)</a></p></td>
-</tr>
-<tr>
-<td><p>6450576</p></td>
-<td><p>134620</p></td>
-<td><p>27484</p></td>
-<td><p>100.3</p></td>
-<td><p>0.8</p></td>
-<td><p>61k</p></td>
-<td><p><a class="reference external" href="rust_and_microservices/report-java-async.html">Bayou (Java), restricted to 1 thread</a></p></td>
-</tr>
-<tr>
-<td><p>8438220</p></td>
-<td><p>270052</p></td>
-<td><p>28140</p></td>
-<td><p>233.6</p></td>
-<td><p>1.7</p></td>
-<td><p>69k</p></td>
-<td><p><a class="reference external" href="rust_and_microservices/report-java-async-3.html">Bayou (Java)</a></p></td>
-</tr>
-<tr>
-<td><p>263.1g</p></td>
-<td><p>253468</p></td>
-<td><p>64360</p></td>
-<td><p>327.9</p></td>
-<td><p>1.6</p></td>
-<td><p>62k</p></td>
-<td><p><a class="reference external" href="rust_and_microservices/report-asp.net.html">ASP.NET (C#)</a></p></td>
-</tr>
-</tbody>
-</table></section>
+<p class="more"><a href="posts/rust-and-microservices/index.html">Read more…</a></p>
 </div>
+                </div>
             </article>
 </div>
     

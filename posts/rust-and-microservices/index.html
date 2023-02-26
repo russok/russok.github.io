@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Rust and microservices | Software design</title>
+<title>Rust and microservices | Ruslan Sokolovski</title>
 <link href="../../assets/css/all-nocdn.css" rel="stylesheet" type="text/css">
 <link href="https://fonts.googleapis.com/css?family=Playfair+Display:700,900" rel="stylesheet">
 <meta name="theme-color" content="#5670d4">
@@ -11,12 +11,12 @@
 <link rel="alternate" type="application/rss+xml" title="RSS" hreflang="en" href="../../rss.xml">
 <link rel="canonical" href="https://russok.github.io/posts/rust-and-microservices/index.html">
 <!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]--><meta name="author" content="Ruslan Sokolovski">
-<meta property="og:site_name" content="Software design">
+<meta property="og:site_name" content="Ruslan Sokolovski">
 <meta property="og:title" content="Rust and microservices">
 <meta property="og:url" content="https://russok.github.io/posts/rust-and-microservices/index.html">
-<meta property="og:description" content="Abstract
-Once Linus Torvalds blesses something, that thing is destined to achieve world domination -
-exemplified by Linux and Git. Now Rust has received the royal nod - it has been accepted as another">
+<meta property="og:description" content="Once Linus Torvalds blesses something, that thing is destined to achieve world domination -
+exemplified by Linux and Git. Now Rust has received the royal nod - it has been accepted as another
+language">
 <meta property="og:type" content="article">
 <meta property="article:published_time" content="2023-01-21T17:55:57-08:00">
 <meta property="article:tag" content="async">
@@ -52,7 +52,7 @@ exemplified by Linux and Git. Now Rust has received the royal nod - it has been 
           <div class="col-md-6 col-xs-10 col-sm-10 bootblog4-brand" style="width: auto;">
             <a class="navbar-brand blog-header-logo text-dark" href="../../">
 
-            <span id="blog-title">Software design</span>
+            <span id="blog-title">Ruslan Sokolovski</span>
         </a>
           </div>
             <div class="col-md-3 justify-content-end align-items-center bs-nav-collapsible collapse flex-collapse bootblog4-right-nav">
@@ -100,81 +100,265 @@ exemplified by Linux and Git. Now Rust has received the royal nod - it has been 
         
 
     </header><div class="e-content entry-content" itemprop="articleBody text">
-    <aside class="admonition admonition-abstract"><p class="admonition-title">Abstract</p>
-<p>Once Linus Torvalds blesses something, that thing is destined to achieve world domination -
+    <p>Once Linus Torvalds blesses something, that thing is destined to achieve world domination -
 exemplified by Linux and Git. Now Rust has received the royal nod - it has been accepted as another
-language for Linux kernel development. Efforts are underway to
-<a class="reference external" href="https://itsfoss.com/rust-cli-tools">rewrite</a>
-<a class="reference external" href="https://github.com/ogham/exa">everything</a>
-<a class="reference external" href="https://blog.edfloreshz.dev/articles/linux/system76/rust-based-desktop-environment/">in Rust</a>
-:). I will
-write about how Rust is different and similar to other mainstream languages. Then I will compare
-implementations of a simple web service in Python, Javascript, C++, C#, Java, and
+language for Linux kernel development. Efforts are underway to rewrite everything in Rust, starting
+from the <a class="reference external" href="https://github.com/ogham/exa">ls</a> utility and other <a class="reference external" href="https://itsfoss.com/rust-cli-tools">everyday command line tools</a>
+to the <a class="reference external" href="https://blog.edfloreshz.dev/articles/linux/system76/rust-based-desktop-environment/">whole graphical desktop environment</a>.
+In this article I discuss similarities and differences between Rust and other mainstream languages.
+I compare implementations of a simple web service in Python, Javascript, C++, C#, Java, and
 Rust, and race them against each other to compare their performance.</p>
-</aside><section id="introduction"><h2>Introduction</h2>
-<p>This post started as an exploration of <a class="reference external" href="https://www.rust-lang.org/">Rust</a>, by a neophite,
+<!-- END_TEASER -->
+<p>This started as an exploration of <a class="reference external" href="https://www.rust-lang.org/">Rust</a>, by a neophyte,
 and developed into a benchmark of asynchronous web services in different languages.</p>
-<p>I started looking at researching Rust to see what causes so much enthusiasm about the language
+<p>I started researching Rust to understand what causes so much enthusiasm about the language
 among experienced software developers and novices alike. The language designers at Mozilla were motivated
 by the desire to work with a performant language that is safer and simpler than C++. I have written
-C++ code for decades, seen the evolution of the language, was frustrated by its many foot-guns, but
+C++ code for decades, seen the evolution of the language, was frustrated by its many foot-guns <a class="footnote-reference brackets" href="index.html#footnote-1" id="footnote-reference-1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>, but
 also delighted by the emerging simplicity of the code enabled by the most recent iterations of the
-C++ standard. So I took Rust for a spin and summarized my findings here. I compared the language
+C++ standard <a class="footnote-reference brackets" href="index.html#footnote-2" id="footnote-reference-2" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a>. I took Rust for a spin and summarized my findings here. I compared the language
 features, tools, and the software performance to the languages I am most familiar with: C++, C#,
 Java, Python, Javascript.</p>
-</section><section id="the-30-000-foot-overview"><h2>The 30,000 foot overview</h2>
-<p>Rust is a strongly typed language, very much like many other mainstream languages, such as C++, C#, Java.
-Strong typing is a practically a must for writing performant software.
+<aside class="footnote-list brackets"><aside class="footnote brackets" id="footnote-1" role="note"><span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="index.html#footnote-reference-1">1</a><span class="fn-bracket">]</span></span>
+<p>If you have programmed in C++ for many years, then avoiding most C++ pitfalls is second nature
+and maybe not even an inconvenience. In that case, you may enjoy a refresher on some of them.</p>
+<ul>
+<li>
+<p><a class="reference external" href="https://en.wikipedia.org/wiki/Most_vexing_parse">the most vexing parse</a> made me spend
+several days debugging in order to fix the bug in plain sight. Why was <code class="docutils literal">my_object</code> never constructed?</p>
+<div class="code"><pre class="code cpp"><a id="rest_code_6109b22e9a62436cb6f8cb18583ce7d1-1" name="rest_code_6109b22e9a62436cb6f8cb18583ce7d1-1" href="index.html#rest_code_6109b22e9a62436cb6f8cb18583ce7d1-1"></a><span class="n">MyClass</span><span class="w"> </span><span class="nf">my_object</span><span class="p">();</span>
+</pre></div>
+</li>
+<li><p>the desire to avoid the most vexing parse was one of the motivations of the <em>uniform initialization</em>
+syntax, only to discover that the latter has its <a class="reference external" href="https://medium.com/@barryrevzin/uniform-initialization-isnt-82533d3b9c11">own pitfalls</a>,
+such as the confusion that results when one of
+the class constructors accepts an <code class="docutils literal">initializer_list</code> argument.</p></li>
+<li><p>As the language evolved, the advice on what makes a healthy class
+changed from the <em>rule of 3</em> to <em>the rule of 3/5</em> to <a class="reference external" href="https://en.cppreference.com/w/cpp/language/rule_of_three">the rule of 3/5/0</a>.</p></li>
+</ul></aside><aside class="footnote brackets" id="footnote-2" role="note"><span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="index.html#footnote-reference-2">2</a><span class="fn-bracket">]</span></span>
+<p>The desire to eschew the bad parts of C++, even at the expense of backwards compatibility,
+is familiar to many people. That motivated, for example <a class="reference external" href="https://dlang.org/">D</a>
+and <a class="reference external" href="https://ziglang.org/">Zig</a>. In 2022, two
+more post-C++ languages were introduced: <a class="reference external" href="https://github.com/carbon-language/carbon-lang">Carbon</a>
+and <a class="reference external" href="https://github.com/hsutter/cppfront">Cppront</a>.</p>
+</aside></aside><section id="rust-features"><h2>Rust features</h2>
+<p>Rust is a strongly typed language, like many other mainstream languages, such as C++, C#, Java.
+Strong typing is practically a must for writing performant software.
 Languages with <a class="reference external" href="https://en.wikipedia.org/wiki/Duck_typing">duck-typing</a>
-(such as Python and Javascript) win on the ease of prototyping,
-but lose on software performance and on the ability to scale software projects to
-millions lines of code.</p>
+(such as Python and Javascript) win on ease of prototyping,
+but lose on software performance and on ability to scale software projects to
+many thousands of lines of code. For example, in Python, if you successfully imported a module
+that contains these lines:</p>
+<div class="code"><pre class="code python"><a id="rest_code_f72016a310a245bfb87f5ac28e7ccd17-1" name="rest_code_f72016a310a245bfb87f5ac28e7ccd17-1" href="index.html#rest_code_f72016a310a245bfb87f5ac28e7ccd17-1"></a><span class="k">try</span><span class="p">:</span>
+<a id="rest_code_f72016a310a245bfb87f5ac28e7ccd17-2" name="rest_code_f72016a310a245bfb87f5ac28e7ccd17-2" href="index.html#rest_code_f72016a310a245bfb87f5ac28e7ccd17-2"></a>    <span class="n">cursor</span> <span class="o">=</span> <span class="n">get_db_cursor</span><span class="p">()</span>
+<a id="rest_code_f72016a310a245bfb87f5ac28e7ccd17-3" name="rest_code_f72016a310a245bfb87f5ac28e7ccd17-3" href="index.html#rest_code_f72016a310a245bfb87f5ac28e7ccd17-3"></a><span class="k">except</span> <span class="n">SomeException</span><span class="p">:</span>
+<a id="rest_code_f72016a310a245bfb87f5ac28e7ccd17-4" name="rest_code_f72016a310a245bfb87f5ac28e7ccd17-4" href="index.html#rest_code_f72016a310a245bfb87f5ac28e7ccd17-4"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Do not have database access in </span><span class="si">{</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="rest_code_f72016a310a245bfb87f5ac28e7ccd17-5" name="rest_code_f72016a310a245bfb87f5ac28e7ccd17-5" href="index.html#rest_code_f72016a310a245bfb87f5ac28e7ccd17-5"></a>    <span class="k">raise</span>
+</pre></div>
+<p>there is no guarantee that the variable <code>logger</code> is defined, or that the
+<code>logger</code> object has the <code>exception</code> method. You can only be reasonably
+sure with 100% test coverage, which is very difficult to achieve, as the situation
+in the exception handler is typically exceptional, and therefore hard to get into.</p>
+<p>Strong typing is also instrumental in letting your code editor auto-complete as you type.
+Since Rust is a strongly typed language, the editor helpfully suggests the attributes and methods that
+you can use with the variable you entered. The access to the documentation
+(What does this method do? Which input goes first and which goes second?)
+is instantaneous. The strong typing does not preclude having some variables duck-typed.
+Rust has the <code>std::any::Any</code> type for that, in C++ that would be <code>std::any</code>,
+and in C# one can choose between plain <code>object</code> and <code>dynamic</code>.</p>
 <p>Another pillar of Rust is the value safety. I put in this bucket the const correctness and the absence of null pointers.
 The former means that each variable is by default declared as constant and the compiler will prevent you
-from accidentally changing it. The latter comes about due to prolific use of dicriminated unions and the
-compiler forcing the programmer to deal with all members of the union. Another compile time mechanism,
-called <em>borrow checker</em>, was added to avoid "use after free" errors. In addition, bounds checks are performed
-automatically at run time on each array access.</p>
+from accidentally changing it. The latter is possible due to prolific use of discriminated unions and the
+compiler forcing the programmer to deal with all members of the union. Similar facilities are present in Java, C#,
+and C++. In C++, they are expressed with <code class="docutils literal"><span class="pre">std::variant</span></code> and <code class="docutils literal"><span class="pre">std::optional</span></code>. Rust uses
+such facilities where many other languages would employ null pointers (or null objects) and exceptions.</p>
+<p>Similar to C++, Rust uses deterministic object life-time rules and smart pointers for
+<a class="reference external" href="https://en.wikipedia.org/wiki/Resource_acquisition_is_initialization">resource management</a>,
+unlike the garbage collection machinery of C#/Java/Python/Javascript.
+A novel compile time mechanism, called <em>borrow checker</em>, was added to avoid "use after free" errors.</p>
+<p>In addition, bounds checks are performed automatically at run time on each array access.</p>
+<p>To break the safety rules enforced by the compiler, one has to mark the
+code block using the <em>unsafe</em> keyword, showing the code reviewers where to pay special attention.</p>
 <p>Another feature of the language, according to its cheerleaders, is simplicity.
 Simplicity is often in the eyes of the beholder. Looks like Rust avoids the complexity of C++'s template
 metaprogramming, but at the cost of using powerful (and necessarily complex) preprocessor.</p>
-</section><section id="features"><h2>Features</h2>
-<p>Take some C++ ideas</p>
+<p>Just like C++/C#/Java, Rust supports parameterized types. Parameter constraints have been supported from the get-go,
+while it took decades for C++ to add <a class="reference external" href="https://en.cppreference.com/w/cpp/language/constraints">such support</a>
+beyond the <code class="docutils literal">enable_if</code> hack.</p>
+<p>Call me superficial, but what I liked the most in Rust was the supporting tools.
+The package repository is a huge convenience, and so are the standard code and documentation building tools.
+This is quite similar to the experience in most modern languages, but not in C++. Using a C++ library, such as
+<a class="reference external" href="https://boost.org">Boost</a>, even in this day and age, requires manually downloading, unpacking, and building it,
+and the build system (bjam or CMake) is non-standard and unsightly.
+Some C++ <a class="reference external" href="https://conan.io/">package repositories</a> are <a class="reference external" href="https://vcpkg.io/">available</a>,
+but the eco-system has become fragmented long before becoming standard practice.</p>
+</section><section id="whose-lunch-does-rust-want-to-eat"><h2>Whose lunch does Rust want to eat?</h2>
+<p>The most likely victims are C and C++. The head Linux honcho gave a go-ahead to using Rust in Linux device drivers
+- the privilege that has always been denied to C++. One of the foremost reasons for the Linus's dislike of C++
+is <a class="reference external" href="https://www.realworldtech.com/forum/?threadid=104196&amp;curpostid=104208">the use of exceptions</a>. Notably
+Rust does not support exceptions, unlike C++, C#, Java, Python, Javascript and many other
+languages that are younger than C.</p>
+<p>The combination of high performance and high convenience in C++ is often described as
+"you do not pay for the features you do not use", and that is an excellent trait to find
+in a programming language. Unfortunately, the usage of exceptions is not one of those features.
+The programmer does pay for existence of exceptions, even if her code does not use them.
+One type of the cost is that the reasoning about the code is more difficult - every function
+call may return a value of the declared type, but an exception is always another possibility -
+a very different outcome that leads to a very different code path. There is also a run time
+cost, as the compiler has to take that other code path into account. Even when no exception
+is thrown, there is a cost - the objects that need to be destroyed in case of an exception
+need to be registered and deregistered. There is also a cost for the compiler writer -
+the generated code is now more entangled, so optimizations are more difficult to perform.</p>
+</section><section id="microservice-speed-test"><h2>Microservice speed test</h2>
+<p>How performant is the software implemented in Rust compared to other languages?
+I expected the Rust software to be be more performant than C# and Java
+due to the cost of the bytecode interpretation in the latter languages. Python and Javascript
+have an extra cost of duck typing piled on top of that. The better performance of Rust over
+C++ software is not assured. If it does perform better, the difference gives some idea about
+the cost of exception handling and the burden of the language complexity on the compiler
+and the standard library implementer in C++ compared to Rust.</p>
+<!-- Interplay between what the compiler and the runtime does for you and how much the compiler writers have to endure as a cost.
+The language complexity may not only hurt programmer's performance, but also hurt the quality of the code generated by
+the compiler. -->
+<p>To leave the <em>armchair philosophising</em> territory and enter the <em>strong anecdotal evidence</em> land,
+I have implemented a toy microservice in Rust and raced it against the
+equivalent microservices written in other languages <a class="footnote-reference brackets" href="index.html#footnote-3" id="footnote-reference-3" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a>. In the <a class="reference external" href="https://github.com/russok/microservices">supplemental git repository</a> you can find the source code for the web services
+I implemented for this performance competition.</p>
+<aside class="footnote-list brackets"><aside class="footnote brackets" id="footnote-3" role="note"><span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="index.html#footnote-reference-3">3</a><span class="fn-bracket">]</span></span>
+<p>We are following in the footsteps of
+<a class="reference external" href="https://github.com/PlummersSoftwareLLC/Primes">Software Drag Race</a> which compares
+various implementations of prime number sieve and their performance.</p>
+</aside></aside><p>I chose to implement an <strong>asynchronous</strong> <a class="footnote-reference brackets" href="index.html#footnote-4" id="footnote-reference-4" role="doc-noteref"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></a> web service. Asynchronous web servers solve the so-called
+<strong>10k</strong> problem. It means supporting more than 10,000 simultaneous connections to the server. In other words,
+handle 10k requests in progress. For regular synchronous servers, that requires more than 10k threads, which
+is not something that regular operating systems on regular hardware are designed <a class="footnote-reference brackets" href="index.html#footnote-5" id="footnote-reference-5" role="doc-noteref"><span class="fn-bracket">[</span>5<span class="fn-bracket">]</span></a> to support.</p>
+<aside class="footnote-list brackets"><aside class="footnote brackets" id="footnote-4" role="note"><span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="index.html#footnote-reference-4">4</a><span class="fn-bracket">]</span></span>
+<p>Just because I could. And if you can, you must. And because <a class="reference external" href="https://www.theonion.com/report-stating-current-year-still-leading-argument-for-1819576151">it was 2022</a>.</p>
+</aside><aside class="footnote brackets" id="footnote-5" role="note"><span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="index.html#footnote-reference-5">5</a><span class="fn-bracket">]</span></span>
+<p>I am curious to know why supporting 10k threads is such a challenge for a modern mainstream OS.
+A part of it is that switching between OS threads requires the OS kernel participation,
+which is more expensive than the co-operative coroutine switching used by the asynchronous servers.
+Another thing is that a typical OS thread comes with 2MB of RAM attached to it, so
+10k threads would consume 20GB of RAM even without doing anything. Those are the reasons
+I have heard, but it is still unclear to me why those issues cannot be solved with
+the magic of virtual memory and other tricks that the modern OSs already liberally use.</p>
+</aside></aside><p>Modern languages implement the asynchronicity using coroutines implemented with <em>async/await</em> keywords <a class="footnote-reference brackets" href="index.html#footnote-6" id="footnote-reference-6" role="doc-noteref"><span class="fn-bracket">[</span>6<span class="fn-bracket">]</span></a>.
+The application starts an event loop, which runs coroutines on a smallish number of threads,
+or even executes all of them in a single thread. Programming coroutines can be simpler than multithreaded
+programming, because a thread can preempt another thread at any point (even in the middle of a programming
+statement) while coroutines are more co-operative, and all the preemption points are marked with the
+<strong>await</strong> keyword. You will not see many of those in the microservices that we are racing, because I wanted
+the simplest possible microservice <a class="footnote-reference brackets" href="index.html#footnote-7" id="footnote-reference-7" role="doc-noteref"><span class="fn-bracket">[</span>7<span class="fn-bracket">]</span></a> - I do not want my server speed comparison to be obscured by the speed
+of dependent services (eg, database accesses) and by the quality of various libraries (eg, JSON serializers).</p>
+<aside class="footnote-list brackets"><aside class="footnote brackets" id="footnote-6" role="note"><span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="index.html#footnote-reference-6">6</a><span class="fn-bracket">]</span></span>
+<p>Java still has not implemented <em>async/await</em>, so the asynchronicity there comes with a
+potential "callback hell".</p>
+</aside><aside class="footnote brackets" id="footnote-7" role="note"><span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="index.html#footnote-reference-7">7</a><span class="fn-bracket">]</span></span>
+<p>If you are sold on Rust and want to know how to write a non-trivial web service, follow
+<a class="reference external" href="https://blog.frankel.ch/http-api-rust/">these</a>
+<a class="reference external" href="https://kerkour.com/rust-web-framework-2022">links</a>.</p>
+</aside></aside><p>We will implement a toy adder service:</p>
+<div class="code"><table class="codetable">
+<tr>
+<td class="linenos linenodiv"><a href="index.html#rest_code_e193993cb09a46a7868cad05b6e8577f-1"><code data-line-number=" 1"></code></a></td>
+<td class="code"><code><a id="rest_code_e193993cb09a46a7868cad05b6e8577f-1" name="rest_code_e193993cb09a46a7868cad05b6e8577f-1"></a><span class="k">use</span><span class="w"> </span><span class="n">warp</span>::<span class="n">Filter</span><span class="p">;</span>
+</code></td>
+</tr>
+<tr>
+<td class="linenos linenodiv"><a href="index.html#rest_code_e193993cb09a46a7868cad05b6e8577f-2"><code data-line-number=" 2"></code></a></td>
+<td class="code"><code><a id="rest_code_e193993cb09a46a7868cad05b6e8577f-2" name="rest_code_e193993cb09a46a7868cad05b6e8577f-2"></a>
+</code></td>
+</tr>
+<tr>
+<td class="linenos linenodiv"><a href="index.html#rest_code_e193993cb09a46a7868cad05b6e8577f-3"><code data-line-number=" 3"></code></a></td>
+<td class="code"><code><a id="rest_code_e193993cb09a46a7868cad05b6e8577f-3" name="rest_code_e193993cb09a46a7868cad05b6e8577f-3"></a><span class="cp">#[tokio::main]</span>
+</code></td>
+</tr>
+<tr>
+<td class="linenos linenodiv"><a href="index.html#rest_code_e193993cb09a46a7868cad05b6e8577f-4"><code data-line-number=" 4"></code></a></td>
+<td class="code"><code><a id="rest_code_e193993cb09a46a7868cad05b6e8577f-4" name="rest_code_e193993cb09a46a7868cad05b6e8577f-4"></a><span class="k">async</span><span class="w"> </span><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+</code></td>
+</tr>
+<tr>
+<td class="linenos linenodiv"><a href="index.html#rest_code_e193993cb09a46a7868cad05b6e8577f-5"><code data-line-number=" 5"></code></a></td>
+<td class="code"><code><a id="rest_code_e193993cb09a46a7868cad05b6e8577f-5" name="rest_code_e193993cb09a46a7868cad05b6e8577f-5"></a><span class="w">    </span><span class="c1">// GET /add/347248/293898 =&gt; 200 OK with plain/text body "347248 + 293898 = 641146"</span>
+</code></td>
+</tr>
+<tr>
+<td class="linenos linenodiv"><a href="index.html#rest_code_e193993cb09a46a7868cad05b6e8577f-6"><code data-line-number=" 6"></code></a></td>
+<td class="code"><code><a id="rest_code_e193993cb09a46a7868cad05b6e8577f-6" name="rest_code_e193993cb09a46a7868cad05b6e8577f-6"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">adder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">warp</span>::<span class="n">path</span><span class="o">!</span><span class="p">(</span><span class="s">"add"</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="kt">i64</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="kt">i64</span><span class="p">)</span>
+</code></td>
+</tr>
+<tr>
+<td class="linenos linenodiv"><a href="index.html#rest_code_e193993cb09a46a7868cad05b6e8577f-7"><code data-line-number=" 7"></code></a></td>
+<td class="code"><code><a id="rest_code_e193993cb09a46a7868cad05b6e8577f-7" name="rest_code_e193993cb09a46a7868cad05b6e8577f-7"></a><span class="w">        </span><span class="p">.</span><span class="n">map</span><span class="p">(</span><span class="o">|</span><span class="n">arg1</span><span class="p">,</span><span class="w"> </span><span class="n">arg2</span><span class="o">|</span><span class="w"> </span><span class="fm">format!</span><span class="p">(</span><span class="s">"{} + {} = {}</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span><span class="w"> </span><span class="n">arg1</span><span class="p">,</span><span class="w"> </span><span class="n">arg2</span><span class="p">,</span><span class="w"> </span><span class="n">arg1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">arg2</span><span class="p">));</span>
+</code></td>
+</tr>
+<tr>
+<td class="linenos linenodiv"><a href="index.html#rest_code_e193993cb09a46a7868cad05b6e8577f-8"><code data-line-number=" 8"></code></a></td>
+<td class="code"><code><a id="rest_code_e193993cb09a46a7868cad05b6e8577f-8" name="rest_code_e193993cb09a46a7868cad05b6e8577f-8"></a>
+</code></td>
+</tr>
+<tr>
+<td class="linenos linenodiv"><a href="index.html#rest_code_e193993cb09a46a7868cad05b6e8577f-9"><code data-line-number=" 9"></code></a></td>
+<td class="code"><code><a id="rest_code_e193993cb09a46a7868cad05b6e8577f-9" name="rest_code_e193993cb09a46a7868cad05b6e8577f-9"></a><span class="w">    </span><span class="n">warp</span>::<span class="n">serve</span><span class="p">(</span><span class="n">adder</span><span class="p">)</span>
+</code></td>
+</tr>
+<tr>
+<td class="linenos linenodiv"><a href="index.html#rest_code_e193993cb09a46a7868cad05b6e8577f-10"><code data-line-number="10"></code></a></td>
+<td class="code"><code><a id="rest_code_e193993cb09a46a7868cad05b6e8577f-10" name="rest_code_e193993cb09a46a7868cad05b6e8577f-10"></a><span class="w">        </span><span class="p">.</span><span class="n">run</span><span class="p">(([</span><span class="mi">127</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="mi">3030</span><span class="p">))</span>
+</code></td>
+</tr>
+<tr>
+<td class="linenos linenodiv"><a href="index.html#rest_code_e193993cb09a46a7868cad05b6e8577f-11"><code data-line-number="11"></code></a></td>
+<td class="code"><code><a id="rest_code_e193993cb09a46a7868cad05b6e8577f-11" name="rest_code_e193993cb09a46a7868cad05b6e8577f-11"></a><span class="w">        </span><span class="p">.</span><span class="k">await</span><span class="p">;</span>
+</code></td>
+</tr>
+<tr>
+<td class="linenos linenodiv"><a href="index.html#rest_code_e193993cb09a46a7868cad05b6e8577f-12"><code data-line-number="12"></code></a></td>
+<td class="code"><code><a id="rest_code_e193993cb09a46a7868cad05b6e8577f-12" name="rest_code_e193993cb09a46a7868cad05b6e8577f-12"></a><span class="p">}</span>
+</code></td>
+</tr>
+</table></div>
+<p>In line 6, the <code>warp::path!</code> macro declares our service end-point: the URL path starts with <strong>add</strong> and is
+followed by two integers (i64), introduced by slashes. Thus we expect to handle a <strong>GET</strong> request with the path
+<strong>/add/347248/293898</strong> and expect a plain text response that states what the sum is: <strong>347248 + 293898 = 641146</strong>.
+Note how the macro can transform a stream of tokens that would absolutely stump the C/C++ preprocessor.
+In line 7 we declare what the handler of that endpoint does: takes the two arguments and forms a string that states
+what their sum is. The <code>format!</code> is also a macro, and it had to be employed because Rust functions do not
+accept variable number of arguments and do not allow overloads based on the argument types - another choice
+that pleases Linus Torvalds. The subsequent lines declare the service on the localhost (127.0.0.1) port 3030
+and hand the service to the event loop.</p>
+<p>The full source code for Rust and other languages, as well as the code that I used for
+<a class="reference external" href="https://github.com/russok/microservices/tree/main/load_test">load-testing</a> the implementations
+of this service are available in <a class="reference external" href="https://github.com/russok/microservices">my git repository</a>.
+It is a joy to see how little code needs to be written to implement a web service in this day and age.
+The C++ code is a little more voluminous than others, but do not blame C++ too much for it.
+The designers of the library that I have chosen in C++ (Boost::beast)
+aimed at a quite low-level framework, good for implementing both synchronous and asynchronous web
+services.</p>
+</section><section id="speed-test-results"><h2>Speed test results</h2>
+<p>The performance measurements were done on an XPS-13 Dell laptop running Ubuntu 20.04. Some hardware info:</p>
 <ul class="simple">
-<li><p>Const correctness</p></li>
-<li><p>Scopes, RAII, smart pointers</p></li>
-<li><p>Lifetime management</p></li>
+<li><p>12 Intel Core i7-10710U CPU @ 1.1GHz</p></li>
+<li><p>16 GB RAM</p></li>
+<li><p>the tests do not perform any storage IO in the steady state, so the storage information is irrelevant</p></li>
 </ul>
-<p>but</p>
-<ul class="simple">
-<li><p>Remove exceptions - pervasively use variant&lt;&gt; and optional&lt;&gt;, with some syntactic sugar added</p></li>
-<li><p>Remove template metaprogramming, keep parameterized types</p></li>
-<li><p>Add stronger (and more complicated) preprocessor</p></li>
-<li><p>No null pointers</p></li>
-<li><p>Add a lot of love and care for the users: package repository, tools</p></li>
-</ul></section><section id="microservice-speed-test"><h2>Microservice speed test</h2>
-<ul class="simple">
-<li><p>Asynchronous web servers - support 10k connections (unfinished requests)</p></li>
-<li><p>Python, NodeJS, C++, C#, Java, Rust</p></li>
-<li><p>Lack of language support for asynchronicity in Java</p></li>
-<li><p>The example service is absolutely minimal, is async (controlled by the event loop), but does not use the asynchronicity.
-That is to measure only the speed of the server and not the speed of dependent services, json serializers, etc</p></li>
-</ul></section><section id="speed-test-results"><h2>Speed test results</h2>
-<figure><a class="reference external image-reference" href="../../rust_and_microservices/py3.8-fast-api.html"><img alt="Performance of the FastAPI microservice under Python 3.8." class="thumbnail" src="../../rust_and_microservices/py3.8.png"></a>
-</figure><p>The following performance measurements were performed on an XPS-13 Dell laptop running Ubuntu 20.04:</p>
+<p>The tests were performed for the microservice implemented in the following web frameworks:</p>
 <ul class="simple">
 <li><p>Tokio/Warp (Rust)</p></li>
-<li><p>Boost::beast (C++), 1 thread</p></li>
-<li><p>Boost::beast (C++), 2 threads</p></li>
-<li><p>Boost::beast (C++), 3 threads</p></li>
+<li><p>Boost::beast (C++)</p></li>
 <li><p>FastAPI under Python 3.8</p></li>
-<li><p>FastAPI under Python 3.11</p></li>
 <li><p>Node Express (Javascript)</p></li>
-<li><p>Bayou (Java), restricted to 1 thread</p></li>
 <li><p>Bayou (Java)</p></li>
 <li><p>ASP.NET (C#)</p></li>
 </ul>
-<!-- +- - - - - - - - -+- - - - - - - -+- - - - - - -+- - - - - - -+- - - - - - -+- - - - - -+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -+
+<figure><a class="reference external image-reference" href="../../rust_and_microservices/py3.8-fast-api.html"><img alt="../../rust_and_microservices/py3.8.png" class="thumbnail" src="../../rust_and_microservices/py3.8.png"></a>
+<figcaption><p>Performance of the FastAPI microservice under Python 3.8. The graph shows the number of requests per second versus time.
+After several minutes of that load, my laptop's fan turns on and the performance drops about 20%. The eventual
+performance drop is due to thermal protection kicking in and happens in all other tests as well.
+It is a feature of the particular hardware I am testing on and not a feature of the tested software.</p>
+</figcaption></figure><!-- +- - - - - - - - -+- - - - - - - -+- - - - - - -+- - - - - - -+- - - - - - -+- - - - - -+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -+
 |   VIRT  |   RES  |   SHR | %CPU  | %MEM  | Rate | COMMAND                                                                      |
 +- - - - - - - - -+- - - - - - - -+- - - - - - -+- - - - - - -+- - - - - - -+- - - - - -+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -+
 | 817708  |  3244  |  2940 | 155.0 |  0.0  |  75k | `Rust <../../rust_and_microservices/rust.html>`_                             |
@@ -187,7 +371,9 @@ That is to measure only the speed of the server and not the speed of dependent s
 | 6450576 | 134620 | 27484 | 100.3 |  0.8  |  61k | java -XX:ActiveProcessorCount=1 -jar bayou-microservice.jar                  |
 | 8438220 | 270052 | 28140 | 233.6 |  1.7  |  69k | java -jar bayou-microservice.jar                                             |
 | 263.1g  | 253468 | 64360 | 327.9 |  1.6  |  62k | ./bin/release/net7.0/asp.net                                                 |
-+- - - - - - - - -+- - - - - - - -+- - - - - - -+- - - - - - -+- - - - - - -+- - - - - -+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -+ --><style>
++- - - - - - - - -+- - - - - - - -+- - - - - - -+- - - - - - -+- - - - - - -+- - - - - -+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -+ --><p>The comparative performance and footprint of each microservice is summarized in the following table.
+Follow the links in the last column to see the report for the specific microservice implementation.</p>
+<style>
 table.right-align-except-right-col thead tr:nth-child(odd),
 table.right-align-except-right-col tbody tr:nth-child(even)
 {
@@ -205,110 +391,98 @@ table.right-align-except-right-col tr th:last-child
 </style>
 <!-- in sphinx, use rst-class instead --><table class="right-align-except-right-col" style="width: 100%;">
 <caption>Resource consumption and performance of microservices, roughly ordered by the amount of RAM consumed.
-Virtual, Resident and Shared memory numbers are in kB units. The 100% CPU corresponds to 1 core, and 100% of RAM is 16GB.
+Virtual, Resident and Shared memory numbers are in kB units. The 100% CPU corresponds to 1 core.
 Follow the links to see full performance reports.</caption>
 <thead><tr>
 <th class="head"><p>VIRT</p></th>
 <th class="head"><p>RES</p></th>
 <th class="head"><p>SHR</p></th>
 <th class="head"><p>%CPU</p></th>
-<th class="head"><p>%MEM</p></th>
 <th class="head"><p>Rate</p></th>
 <th class="head"><p>Implementation</p></th>
 </tr></thead>
 <tbody>
 <tr>
-<td><p>817708</p></td>
-<td><p>3244</p></td>
-<td><p>2940</p></td>
-<td><p>155.0</p></td>
-<td><p>0.0</p></td>
+<td><p>817,708</p></td>
+<td><p>3,244</p></td>
+<td><p>2,940</p></td>
+<td><p>155</p></td>
 <td><p>75k</p></td>
 <td><p><a class="reference external" href="../../rust_and_microservices/rust.html">Tokio/Warp (Rust)</a></p></td>
 </tr>
 <tr>
-<td><p>8272</p></td>
-<td><p>4668</p></td>
-<td><p>4180</p></td>
-<td><p>99.7</p></td>
-<td><p>0.0</p></td>
+<td><p>8,272</p></td>
+<td><p>4,668</p></td>
+<td><p>4,180</p></td>
+<td><p>100</p></td>
 <td><p>47k</p></td>
-<td><p><a class="reference external" href="../../rust_and_microservices/report-beast.html">Boost::beast (C++), 1 thread</a></p></td>
+<td><p><a class="reference external" href="../../rust_and_microservices/report-beast.html">Boost::beast (C++)</a></p></td>
 </tr>
 <tr>
-<td><p>81504</p></td>
-<td><p>4360</p></td>
-<td><p>4072</p></td>
-<td><p>200.0</p></td>
-<td><p>0.0</p></td>
-<td><p>58k</p></td>
-<td><p><a class="reference external" href="../../rust_and_microservices/report-beast-2.html">Boost::beast (C++), 2 threads</a></p></td>
-</tr>
-<tr>
-<td><p>155228</p></td>
-<td><p>4404</p></td>
-<td><p>4120</p></td>
-<td><p>295.7</p></td>
-<td><p>0.0</p></td>
-<td><p>72k</p></td>
-<td><p><a class="reference external" href="../../rust_and_microservices/report-beast-3.html">Boost::beast (C++), 3 threads</a></p></td>
-</tr>
-<tr>
-<td><p>150040</p></td>
-<td><p>37876</p></td>
-<td><p>16112</p></td>
-<td><p>100.0</p></td>
-<td><p>0.2</p></td>
+<td><p>150,040</p></td>
+<td><p>37,876</p></td>
+<td><p>16,112</p></td>
+<td><p>100</p></td>
 <td><p>9k</p></td>
 <td><p><a class="reference external" href="../../rust_and_microservices/py3.8-fast-api.html">FastAPI under Python 3.8</a></p></td>
 </tr>
 <tr>
-<td><p>152896</p></td>
-<td><p>41496</p></td>
-<td><p>17348</p></td>
-<td><p>100.0</p></td>
-<td><p>0.3</p></td>
+<td><p>152,896</p></td>
+<td><p>41,496</p></td>
+<td><p>17,348</p></td>
+<td><p>100</p></td>
 <td><p>11k</p></td>
 <td><p><a class="reference external" href="../../rust_and_microservices/py3.11-fast-api.html">FastAPI under Python 3.11</a></p></td>
 </tr>
 <tr>
-<td><p>619840</p></td>
-<td><p>77376</p></td>
-<td><p>30088</p></td>
-<td><p>106.0</p></td>
-<td><p>0.5</p></td>
+<td><p>619,840</p></td>
+<td><p>77,376</p></td>
+<td><p>30,088</p></td>
+<td><p>106</p></td>
 <td><p>10k</p></td>
 <td><p><a class="reference external" href="../../rust_and_microservices/report-node.html">Node Express (Javascript)</a></p></td>
 </tr>
 <tr>
-<td><p>6450576</p></td>
-<td><p>134620</p></td>
-<td><p>27484</p></td>
-<td><p>100.3</p></td>
-<td><p>0.8</p></td>
-<td><p>61k</p></td>
+<td><p>6,450,576</p></td>
+<td><p>134,620</p></td>
+<td><p>27,484</p></td>
+<td><p>100</p></td>
+<td><p>59k</p></td>
 <td><p><a class="reference external" href="../../rust_and_microservices/report-java-async.html">Bayou (Java), restricted to 1 thread</a></p></td>
 </tr>
 <tr>
-<td><p>8438220</p></td>
-<td><p>270052</p></td>
-<td><p>28140</p></td>
-<td><p>233.6</p></td>
-<td><p>1.7</p></td>
+<td><p>8,438,220</p></td>
+<td><p>270,052</p></td>
+<td><p>28,140</p></td>
+<td><p>234</p></td>
 <td><p>69k</p></td>
 <td><p><a class="reference external" href="../../rust_and_microservices/report-java-async-3.html">Bayou (Java)</a></p></td>
 </tr>
 <tr>
 <td><p>263.1g</p></td>
-<td><p>253468</p></td>
-<td><p>64360</p></td>
-<td><p>327.9</p></td>
-<td><p>1.6</p></td>
+<td><p>253,468</p></td>
+<td><p>64,360</p></td>
+<td><p>328</p></td>
 <td><p>62k</p></td>
 <td><p><a class="reference external" href="../../rust_and_microservices/report-asp.net.html">ASP.NET (C#)</a></p></td>
 </tr>
 </tbody>
-</table></section>
+</table>
+<p>As you can see in the table, Rust is the king of the performance roost, but not if you consider
+its performance per one CPU cycle. I was not able to restrict the Rust microservice to just one CPU
+so it consumed 155% of a CPU core. When reduced to just one core, the Rust microservice can handle
+75k/1.55 = 48k requests per second. That is the same performance as the performance of the microservice
+implemented in C++, and surprisingly less than the performance of the Bayou (Java) microservice -
+59k requests per second. That observarion may move you towards implementing asynchronous web services in Java
+from now on, but be aware that Java does not natively support <em>async/await</em> keywords, so the
+ecosystem for asynchronous programming is not great in Java. The Bayou framework uses futures and
+callbacks to implement the asynchronicity.</p>
+<p>Another thing to notice is that the Rust and C++ microservices consume much smaller amount of memory,
+which is important in today's world, where microservices are packed into containers and placed into any
+cloud machine that has enough resources for them. Thus Rust and C++ microservices can be inserted
+into various micro-corners of the cloud where Python and Node microservices would not fit, and C# or Java
+web services would not deserve the prefix "micro".</p>
+</section>
 </div>
     <aside class="postpromonav"><nav><ul itemprop="keywords" class="tags">
 <li><a class="tag p-category" href="../../categories/async/index.html" rel="tag">async</a></li>
