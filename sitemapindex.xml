@@ -7,63 +7,63 @@
                         http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
  <sitemap>
   <loc>https://russok.github.io/categories/async.xml</loc>
-  <lastmod>2023-02-27T02:44:00Z</lastmod>
+  <lastmod>2023-02-27T02:55:00Z</lastmod>
  </sitemap>
  <sitemap>
   <loc>https://russok.github.io/categories/asyncawait.xml</loc>
-  <lastmod>2023-02-27T02:44:00Z</lastmod>
+  <lastmod>2023-02-27T02:55:00Z</lastmod>
  </sitemap>
  <sitemap>
   <loc>https://russok.github.io/categories/bayou.xml</loc>
-  <lastmod>2023-02-27T02:44:00Z</lastmod>
+  <lastmod>2023-02-27T02:55:00Z</lastmod>
  </sitemap>
  <sitemap>
   <loc>https://russok.github.io/categories/benchmark.xml</loc>
-  <lastmod>2023-02-27T02:44:00Z</lastmod>
+  <lastmod>2023-02-27T02:55:00Z</lastmod>
  </sitemap>
  <sitemap>
   <loc>https://russok.github.io/categories/boostbeast.xml</loc>
-  <lastmod>2023-02-27T02:44:00Z</lastmod>
+  <lastmod>2023-02-27T02:55:00Z</lastmod>
  </sitemap>
  <sitemap>
   <loc>https://russok.github.io/categories/c%2B%2B.xml</loc>
-  <lastmod>2023-02-27T02:44:00Z</lastmod>
+  <lastmod>2023-02-27T02:55:00Z</lastmod>
  </sitemap>
  <sitemap>
   <loc>https://russok.github.io/categories/c.xml</loc>
-  <lastmod>2023-02-27T02:44:00Z</lastmod>
+  <lastmod>2023-02-27T02:55:00Z</lastmod>
  </sitemap>
  <sitemap>
   <loc>https://russok.github.io/categories/fastapi.xml</loc>
-  <lastmod>2023-02-27T02:44:00Z</lastmod>
+  <lastmod>2023-02-27T02:55:00Z</lastmod>
  </sitemap>
  <sitemap>
   <loc>https://russok.github.io/categories/java.xml</loc>
-  <lastmod>2023-02-27T02:44:00Z</lastmod>
+  <lastmod>2023-02-27T02:55:00Z</lastmod>
  </sitemap>
  <sitemap>
   <loc>https://russok.github.io/categories/microservice.xml</loc>
-  <lastmod>2023-02-27T02:44:00Z</lastmod>
+  <lastmod>2023-02-27T02:55:00Z</lastmod>
  </sitemap>
  <sitemap>
   <loc>https://russok.github.io/categories/node-express.xml</loc>
-  <lastmod>2023-02-27T02:44:00Z</lastmod>
+  <lastmod>2023-02-27T02:55:00Z</lastmod>
  </sitemap>
  <sitemap>
   <loc>https://russok.github.io/categories/nodejs.xml</loc>
-  <lastmod>2023-02-27T02:44:00Z</lastmod>
+  <lastmod>2023-02-27T02:55:00Z</lastmod>
  </sitemap>
  <sitemap>
   <loc>https://russok.github.io/categories/python.xml</loc>
-  <lastmod>2023-02-27T02:44:00Z</lastmod>
+  <lastmod>2023-02-27T02:55:00Z</lastmod>
  </sitemap>
  <sitemap>
   <loc>https://russok.github.io/categories/rust.xml</loc>
-  <lastmod>2023-02-27T02:44:00Z</lastmod>
+  <lastmod>2023-02-27T02:55:00Z</lastmod>
  </sitemap>
  <sitemap>
   <loc>https://russok.github.io/categories/tokio.xml</loc>
-  <lastmod>2023-02-27T02:44:00Z</lastmod>
+  <lastmod>2023-02-27T02:55:00Z</lastmod>
  </sitemap>
  <sitemap>
   <loc>https://russok.github.io/galleries/demo/rss.xml</loc>
@@ -75,10 +75,10 @@
  </sitemap>
  <sitemap>
   <loc>https://russok.github.io/rss.xml</loc>
-  <lastmod>2023-02-27T02:44:00Z</lastmod>
+  <lastmod>2023-02-27T02:55:00Z</lastmod>
  </sitemap>
  <sitemap>
   <loc>https://russok.github.io/sitemap.xml</loc>
-  <lastmod>2023-02-27T02:44:00Z</lastmod>
+  <lastmod>2023-02-27T02:55:00Z</lastmod>
  </sitemap>
 </sitemapindex>
