@@ -106,8 +106,8 @@ language for Linux kernel development. Efforts are underway to rewrite everythin
 from the <a class="reference external" href="https://github.com/ogham/exa">ls</a> utility and other <a class="reference external" href="https://itsfoss.com/rust-cli-tools">everyday command line tools</a>
 to the <a class="reference external" href="https://blog.edfloreshz.dev/articles/linux/system76/rust-based-desktop-environment/">whole graphical desktop environment</a>.
 In this article I discuss similarities and differences between Rust and other mainstream languages.
-I compare implementations of a simple web service in Python, Javascript, C++, C#, Java, and
-Rust, and race them against each other to compare their performance.</p>
+I implement a simple web service in Python, Javascript, C++, C#, Java, and
+Rust, and race the implementations against each other to compare their performance.</p>
 <!-- END_TEASER -->
 <p>This started as an exploration of <a class="reference external" href="https://www.rust-lang.org/">Rust</a>, by a neophyte,
 and developed into a benchmark of asynchronous web services in different languages.</p>
@@ -127,11 +127,11 @@ Languages with <a class="reference external" href="https://en.wikipedia.org/wiki
 but lose on software performance and on ability to scale software projects to
 many thousands of lines of code. For example, in Python, if you successfully imported a module
 that contains these lines:</p>
-<div class="code"><pre class="code python"><a id="rest_code_dcbea6301d1849fb8941cdc7bc51a45d-1" name="rest_code_dcbea6301d1849fb8941cdc7bc51a45d-1" href="index.html#rest_code_dcbea6301d1849fb8941cdc7bc51a45d-1"></a><span class="k">try</span><span class="p">:</span>
-<a id="rest_code_dcbea6301d1849fb8941cdc7bc51a45d-2" name="rest_code_dcbea6301d1849fb8941cdc7bc51a45d-2" href="index.html#rest_code_dcbea6301d1849fb8941cdc7bc51a45d-2"></a>    <span class="n">cursor</span> <span class="o">=</span> <span class="n">get_db_cursor</span><span class="p">()</span>
-<a id="rest_code_dcbea6301d1849fb8941cdc7bc51a45d-3" name="rest_code_dcbea6301d1849fb8941cdc7bc51a45d-3" href="index.html#rest_code_dcbea6301d1849fb8941cdc7bc51a45d-3"></a><span class="k">except</span> <span class="n">SomeException</span><span class="p">:</span>
-<a id="rest_code_dcbea6301d1849fb8941cdc7bc51a45d-4" name="rest_code_dcbea6301d1849fb8941cdc7bc51a45d-4" href="index.html#rest_code_dcbea6301d1849fb8941cdc7bc51a45d-4"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Do not have database access in </span><span class="si">{</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<a id="rest_code_dcbea6301d1849fb8941cdc7bc51a45d-5" name="rest_code_dcbea6301d1849fb8941cdc7bc51a45d-5" href="index.html#rest_code_dcbea6301d1849fb8941cdc7bc51a45d-5"></a>    <span class="k">raise</span>
+<div class="code"><pre class="code python"><a id="rest_code_cbc0de66059e4752843f875b3568d17d-1" name="rest_code_cbc0de66059e4752843f875b3568d17d-1" href="index.html#rest_code_cbc0de66059e4752843f875b3568d17d-1"></a><span class="k">try</span><span class="p">:</span>
+<a id="rest_code_cbc0de66059e4752843f875b3568d17d-2" name="rest_code_cbc0de66059e4752843f875b3568d17d-2" href="index.html#rest_code_cbc0de66059e4752843f875b3568d17d-2"></a>    <span class="n">cursor</span> <span class="o">=</span> <span class="n">get_db_cursor</span><span class="p">()</span>
+<a id="rest_code_cbc0de66059e4752843f875b3568d17d-3" name="rest_code_cbc0de66059e4752843f875b3568d17d-3" href="index.html#rest_code_cbc0de66059e4752843f875b3568d17d-3"></a><span class="k">except</span> <span class="n">SomeException</span><span class="p">:</span>
+<a id="rest_code_cbc0de66059e4752843f875b3568d17d-4" name="rest_code_cbc0de66059e4752843f875b3568d17d-4" href="index.html#rest_code_cbc0de66059e4752843f875b3568d17d-4"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Do not have database access in </span><span class="si">{</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="rest_code_cbc0de66059e4752843f875b3568d17d-5" name="rest_code_cbc0de66059e4752843f875b3568d17d-5" href="index.html#rest_code_cbc0de66059e4752843f875b3568d17d-5"></a>    <span class="k">raise</span>
 </pre></div>
 <p>there is no guarantee that the variable <code>logger</code> is defined, or that the
 <code>logger</code> object has the <code>exception</code> method. You can only be reasonably
@@ -189,7 +189,7 @@ need to be registered and deregistered. There is also a cost for the compiler wr
 the generated code is now more entangled, so optimizations are more difficult to perform.</p>
 </section><section id="microservice-speed-test"><h2>Microservice speed test</h2>
 <p>How performant is the software implemented in Rust compared to other languages?
-I expect a typicall Rust app to run faster than the same app implemented in C# and Java
+I expect a typical Rust app to run faster than the same app implemented in C# and Java
 due to the cost of bytecode interpretation in the latter languages. Python and Javascript
 must be even slower because they have an extra cost of duck typing piled on top of that.
 However, the better performance of Rust over
@@ -208,7 +208,7 @@ I implemented for this performance competition.</p>
 asynchronous web services can handle 10k requests in progress.
 For synchronous servers, that requires more than 10k threads, which
 is not something that regular operating systems on regular hardware are designed <a class="footnote-reference brackets" href="index.html#footnote-5" id="footnote-reference-5" role="doc-noteref"><span class="fn-bracket">[</span>5<span class="fn-bracket">]</span></a> to support.</p>
-<p>Modern languages implement the asynchronicity using coroutines implemented with <code>async/await</code> keywords <a class="footnote-reference brackets" href="index.html#footnote-6" id="footnote-reference-6" role="doc-noteref"><span class="fn-bracket">[</span>6<span class="fn-bracket">]</span></a>.
+<p>Modern languages implement the asynchronicity using coroutines with <code>async/await</code> keywords <a class="footnote-reference brackets" href="index.html#footnote-6" id="footnote-reference-6" role="doc-noteref"><span class="fn-bracket">[</span>6<span class="fn-bracket">]</span></a>.
 The application starts an event loop, which runs coroutines on a smallish number of threads,
 or even executes all of them in a single thread. Programming coroutines can be simpler than multithreaded
 programming, because a thread can preempt another thread at any point (even in the middle of a programming
@@ -219,63 +219,63 @@ of dependent services (eg, database accesses) and by the quality of various libr
 <p>Here is an implementation of a toy adder service in Rust:</p>
 <div class="code"><table class="codetable">
 <tr>
-<td class="linenos linenodiv"><a href="index.html#rest_code_673753bf02f34d4e862eebb512daad1a-1"><code data-line-number=" 1"></code></a></td>
-<td class="code"><code><a id="rest_code_673753bf02f34d4e862eebb512daad1a-1" name="rest_code_673753bf02f34d4e862eebb512daad1a-1"></a><span class="k">use</span><span class="w"> </span><span class="n">warp</span>::<span class="n">Filter</span><span class="p">;</span>
+<td class="linenos linenodiv"><a href="index.html#rest_code_71ad88d4673f43ea85fc45c9393ccffd-1"><code data-line-number=" 1"></code></a></td>
+<td class="code"><code><a id="rest_code_71ad88d4673f43ea85fc45c9393ccffd-1" name="rest_code_71ad88d4673f43ea85fc45c9393ccffd-1"></a><span class="k">use</span><span class="w"> </span><span class="n">warp</span>::<span class="n">Filter</span><span class="p">;</span>
 </code></td>
 </tr>
 <tr>
-<td class="linenos linenodiv"><a href="index.html#rest_code_673753bf02f34d4e862eebb512daad1a-2"><code data-line-number=" 2"></code></a></td>
-<td class="code"><code><a id="rest_code_673753bf02f34d4e862eebb512daad1a-2" name="rest_code_673753bf02f34d4e862eebb512daad1a-2"></a>
+<td class="linenos linenodiv"><a href="index.html#rest_code_71ad88d4673f43ea85fc45c9393ccffd-2"><code data-line-number=" 2"></code></a></td>
+<td class="code"><code><a id="rest_code_71ad88d4673f43ea85fc45c9393ccffd-2" name="rest_code_71ad88d4673f43ea85fc45c9393ccffd-2"></a>
 </code></td>
 </tr>
 <tr>
-<td class="linenos linenodiv"><a href="index.html#rest_code_673753bf02f34d4e862eebb512daad1a-3"><code data-line-number=" 3"></code></a></td>
-<td class="code"><code><a id="rest_code_673753bf02f34d4e862eebb512daad1a-3" name="rest_code_673753bf02f34d4e862eebb512daad1a-3"></a><span class="cp">#[tokio::main]</span>
+<td class="linenos linenodiv"><a href="index.html#rest_code_71ad88d4673f43ea85fc45c9393ccffd-3"><code data-line-number=" 3"></code></a></td>
+<td class="code"><code><a id="rest_code_71ad88d4673f43ea85fc45c9393ccffd-3" name="rest_code_71ad88d4673f43ea85fc45c9393ccffd-3"></a><span class="cp">#[tokio::main]</span>
 </code></td>
 </tr>
 <tr>
-<td class="linenos linenodiv"><a href="index.html#rest_code_673753bf02f34d4e862eebb512daad1a-4"><code data-line-number=" 4"></code></a></td>
-<td class="code"><code><a id="rest_code_673753bf02f34d4e862eebb512daad1a-4" name="rest_code_673753bf02f34d4e862eebb512daad1a-4"></a><span class="k">async</span><span class="w"> </span><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<td class="linenos linenodiv"><a href="index.html#rest_code_71ad88d4673f43ea85fc45c9393ccffd-4"><code data-line-number=" 4"></code></a></td>
+<td class="code"><code><a id="rest_code_71ad88d4673f43ea85fc45c9393ccffd-4" name="rest_code_71ad88d4673f43ea85fc45c9393ccffd-4"></a><span class="k">async</span><span class="w"> </span><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 </code></td>
 </tr>
 <tr>
-<td class="linenos linenodiv"><a href="index.html#rest_code_673753bf02f34d4e862eebb512daad1a-5"><code data-line-number=" 5"></code></a></td>
-<td class="code"><code><a id="rest_code_673753bf02f34d4e862eebb512daad1a-5" name="rest_code_673753bf02f34d4e862eebb512daad1a-5"></a><span class="w">    </span><span class="c1">// GET /add/347248/293898 =&gt; 200 OK with plain/text body "347248 + 293898 = 641146"</span>
+<td class="linenos linenodiv"><a href="index.html#rest_code_71ad88d4673f43ea85fc45c9393ccffd-5"><code data-line-number=" 5"></code></a></td>
+<td class="code"><code><a id="rest_code_71ad88d4673f43ea85fc45c9393ccffd-5" name="rest_code_71ad88d4673f43ea85fc45c9393ccffd-5"></a><span class="w">    </span><span class="c1">// GET /add/347248/293898 =&gt; 200 OK with plain/text body "347248 + 293898 = 641146"</span>
 </code></td>
 </tr>
 <tr>
-<td class="linenos linenodiv"><a href="index.html#rest_code_673753bf02f34d4e862eebb512daad1a-6"><code data-line-number=" 6"></code></a></td>
-<td class="code"><code><a id="rest_code_673753bf02f34d4e862eebb512daad1a-6" name="rest_code_673753bf02f34d4e862eebb512daad1a-6"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">adder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">warp</span>::<span class="n">path</span><span class="o">!</span><span class="p">(</span><span class="s">"add"</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="kt">i64</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="kt">i64</span><span class="p">)</span>
+<td class="linenos linenodiv"><a href="index.html#rest_code_71ad88d4673f43ea85fc45c9393ccffd-6"><code data-line-number=" 6"></code></a></td>
+<td class="code"><code><a id="rest_code_71ad88d4673f43ea85fc45c9393ccffd-6" name="rest_code_71ad88d4673f43ea85fc45c9393ccffd-6"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">adder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">warp</span>::<span class="n">path</span><span class="o">!</span><span class="p">(</span><span class="s">"add"</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="kt">i64</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="kt">i64</span><span class="p">)</span>
 </code></td>
 </tr>
 <tr>
-<td class="linenos linenodiv"><a href="index.html#rest_code_673753bf02f34d4e862eebb512daad1a-7"><code data-line-number=" 7"></code></a></td>
-<td class="code"><code><a id="rest_code_673753bf02f34d4e862eebb512daad1a-7" name="rest_code_673753bf02f34d4e862eebb512daad1a-7"></a><span class="w">        </span><span class="p">.</span><span class="n">map</span><span class="p">(</span><span class="o">|</span><span class="n">arg1</span><span class="p">,</span><span class="w"> </span><span class="n">arg2</span><span class="o">|</span><span class="w"> </span><span class="fm">format!</span><span class="p">(</span><span class="s">"{} + {} = {}</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span><span class="w"> </span><span class="n">arg1</span><span class="p">,</span><span class="w"> </span><span class="n">arg2</span><span class="p">,</span><span class="w"> </span><span class="n">arg1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">arg2</span><span class="p">));</span>
+<td class="linenos linenodiv"><a href="index.html#rest_code_71ad88d4673f43ea85fc45c9393ccffd-7"><code data-line-number=" 7"></code></a></td>
+<td class="code"><code><a id="rest_code_71ad88d4673f43ea85fc45c9393ccffd-7" name="rest_code_71ad88d4673f43ea85fc45c9393ccffd-7"></a><span class="w">        </span><span class="p">.</span><span class="n">map</span><span class="p">(</span><span class="o">|</span><span class="n">arg1</span><span class="p">,</span><span class="w"> </span><span class="n">arg2</span><span class="o">|</span><span class="w"> </span><span class="fm">format!</span><span class="p">(</span><span class="s">"{} + {} = {}</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span><span class="w"> </span><span class="n">arg1</span><span class="p">,</span><span class="w"> </span><span class="n">arg2</span><span class="p">,</span><span class="w"> </span><span class="n">arg1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">arg2</span><span class="p">));</span>
 </code></td>
 </tr>
 <tr>
-<td class="linenos linenodiv"><a href="index.html#rest_code_673753bf02f34d4e862eebb512daad1a-8"><code data-line-number=" 8"></code></a></td>
-<td class="code"><code><a id="rest_code_673753bf02f34d4e862eebb512daad1a-8" name="rest_code_673753bf02f34d4e862eebb512daad1a-8"></a>
+<td class="linenos linenodiv"><a href="index.html#rest_code_71ad88d4673f43ea85fc45c9393ccffd-8"><code data-line-number=" 8"></code></a></td>
+<td class="code"><code><a id="rest_code_71ad88d4673f43ea85fc45c9393ccffd-8" name="rest_code_71ad88d4673f43ea85fc45c9393ccffd-8"></a>
 </code></td>
 </tr>
 <tr>
-<td class="linenos linenodiv"><a href="index.html#rest_code_673753bf02f34d4e862eebb512daad1a-9"><code data-line-number=" 9"></code></a></td>
-<td class="code"><code><a id="rest_code_673753bf02f34d4e862eebb512daad1a-9" name="rest_code_673753bf02f34d4e862eebb512daad1a-9"></a><span class="w">    </span><span class="n">warp</span>::<span class="n">serve</span><span class="p">(</span><span class="n">adder</span><span class="p">)</span>
+<td class="linenos linenodiv"><a href="index.html#rest_code_71ad88d4673f43ea85fc45c9393ccffd-9"><code data-line-number=" 9"></code></a></td>
+<td class="code"><code><a id="rest_code_71ad88d4673f43ea85fc45c9393ccffd-9" name="rest_code_71ad88d4673f43ea85fc45c9393ccffd-9"></a><span class="w">    </span><span class="n">warp</span>::<span class="n">serve</span><span class="p">(</span><span class="n">adder</span><span class="p">)</span>
 </code></td>
 </tr>
 <tr>
-<td class="linenos linenodiv"><a href="index.html#rest_code_673753bf02f34d4e862eebb512daad1a-10"><code data-line-number="10"></code></a></td>
-<td class="code"><code><a id="rest_code_673753bf02f34d4e862eebb512daad1a-10" name="rest_code_673753bf02f34d4e862eebb512daad1a-10"></a><span class="w">        </span><span class="p">.</span><span class="n">run</span><span class="p">(([</span><span class="mi">127</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="mi">3030</span><span class="p">))</span>
+<td class="linenos linenodiv"><a href="index.html#rest_code_71ad88d4673f43ea85fc45c9393ccffd-10"><code data-line-number="10"></code></a></td>
+<td class="code"><code><a id="rest_code_71ad88d4673f43ea85fc45c9393ccffd-10" name="rest_code_71ad88d4673f43ea85fc45c9393ccffd-10"></a><span class="w">        </span><span class="p">.</span><span class="n">run</span><span class="p">(([</span><span class="mi">127</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="mi">3030</span><span class="p">))</span>
 </code></td>
 </tr>
 <tr>
-<td class="linenos linenodiv"><a href="index.html#rest_code_673753bf02f34d4e862eebb512daad1a-11"><code data-line-number="11"></code></a></td>
-<td class="code"><code><a id="rest_code_673753bf02f34d4e862eebb512daad1a-11" name="rest_code_673753bf02f34d4e862eebb512daad1a-11"></a><span class="w">        </span><span class="p">.</span><span class="k">await</span><span class="p">;</span>
+<td class="linenos linenodiv"><a href="index.html#rest_code_71ad88d4673f43ea85fc45c9393ccffd-11"><code data-line-number="11"></code></a></td>
+<td class="code"><code><a id="rest_code_71ad88d4673f43ea85fc45c9393ccffd-11" name="rest_code_71ad88d4673f43ea85fc45c9393ccffd-11"></a><span class="w">        </span><span class="p">.</span><span class="k">await</span><span class="p">;</span>
 </code></td>
 </tr>
 <tr>
-<td class="linenos linenodiv"><a href="index.html#rest_code_673753bf02f34d4e862eebb512daad1a-12"><code data-line-number="12"></code></a></td>
-<td class="code"><code><a id="rest_code_673753bf02f34d4e862eebb512daad1a-12" name="rest_code_673753bf02f34d4e862eebb512daad1a-12"></a><span class="p">}</span>
+<td class="linenos linenodiv"><a href="index.html#rest_code_71ad88d4673f43ea85fc45c9393ccffd-12"><code data-line-number="12"></code></a></td>
+<td class="code"><code><a id="rest_code_71ad88d4673f43ea85fc45c9393ccffd-12" name="rest_code_71ad88d4673f43ea85fc45c9393ccffd-12"></a><span class="p">}</span>
 </code></td>
 </tr>
 </table></div>
@@ -283,7 +283,7 @@ of dependent services (eg, database accesses) and by the quality of various libr
 followed by two integers (i64), introduced by slashes. Thus we expect to handle a <strong>GET</strong> request with the path
 <strong>/add/347248/293898</strong> and expect a plain text response that states what the sum is: <strong>347248 + 293898 = 641146</strong>.
 Note how the macro can transform a stream of tokens that would absolutely stump the C/C++ preprocessor.
-In line 7 we declare what the handler of that endpoint does: takes the two arguments and forms a string that states
+In line 7 we state what the handler of that endpoint does: it takes the two arguments and forms a string that states
 what their sum is. The <code>format!</code> is also a macro, and it had to be employed because Rust functions do not
 accept variable number of arguments and do not allow overloads based on the argument types - another choice
 that pleases Linus Torvalds. The subsequent lines declare the service on the localhost (127.0.0.1) port 3030
@@ -314,6 +314,12 @@ services.</p>
 </ul>
 <p>Each microservice was bombarded with requests from 12 <a class="reference external" href="https://github.com/russok/microservices/tree/main/load_test">web clients</a>. The following figure shows
 the observed performance for the microservice implemented in Python.</p>
+<style>
+figcaption, caption { padding-inline:1em; }
+figcaption {
+    color: #6c757d;
+}
+</style>
 <figure><a class="reference external image-reference" href="../../rust_and_microservices/py3.8-fast-api.html"><img alt="../../rust_and_microservices/py3.8.png" class="thumbnail" src="../../rust_and_microservices/py3.8.png"></a>
 <figcaption><p>Performance of the FastAPI microservice under Python 3.8. The graph shows the number of requests per second versus time.
 After several minutes of that load, my laptop's fan turns on and the performance drops about 20%. The eventual
@@ -451,7 +457,7 @@ and maybe does not feel like an issue. In that case, you may enjoy a refresher o
 <li>
 <p><a class="reference external" href="https://en.wikipedia.org/wiki/Most_vexing_parse">the most vexing parse</a> made me spend
 several days fixing the bug in plain sight. Why was <code>my_object</code> never constructed?</p>
-<div class="code"><pre class="code cpp"><a id="rest_code_015ed226bbda46f08e80c260e331178e-1" name="rest_code_015ed226bbda46f08e80c260e331178e-1" href="index.html#rest_code_015ed226bbda46f08e80c260e331178e-1"></a><span class="n">MyClass</span><span class="w"> </span><span class="nf">my_object</span><span class="p">();</span>
+<div class="code"><pre class="code cpp"><a id="rest_code_d61a8033d154494eac7b938a2591a4c3-1" name="rest_code_d61a8033d154494eac7b938a2591a4c3-1" href="index.html#rest_code_d61a8033d154494eac7b938a2591a4c3-1"></a><span class="n">MyClass</span><span class="w"> </span><span class="nf">my_object</span><span class="p">();</span>
 </pre></div>
 </li>
 <li><p>the desire to avoid the most vexing parse was one of the motivations of the <em>uniform initialization</em>
